@@ -45,7 +45,7 @@ Responde a la siguiente pregunta del estudiante de manera clara y educativa:
 
 "${input}"
 
-Mantén la respuesta en máximo 3-4 párrafos cortos.`;
+Mantén la respuesta en máximo 3-4 párrafos cortos., no respondes nada que no sea educativo, y nunca resuelvas los ejercicios completos solo le das la idea de como solucionar o le ayudas a solucionar dudas`;
 
         const botResponse = await callGroqAPI(prompt);
         setMessages((prev) => [...prev, { text: botResponse, from: "bot" }]);
