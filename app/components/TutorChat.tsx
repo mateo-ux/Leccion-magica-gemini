@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bot, Send } from 'lucide-react';
-import { callGeminiAPI } from '../utils/gemini';
+import { callGroqAPI } from '../utils/groq';
 
 interface TutorChatProps {
     isOpen: boolean;
@@ -47,7 +47,7 @@ Responde a la siguiente pregunta del estudiante de manera clara y educativa:
 
 Mantén la respuesta en máximo 3-4 párrafos cortos.`;
 
-        const botResponse = await callGeminiAPI(prompt);
+        const botResponse = await callGroqAPI(prompt);
         setMessages((prev) => [...prev, { text: botResponse, from: "bot" }]);
         setIsLoading(false);
     };
