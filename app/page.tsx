@@ -1,21 +1,17 @@
 'use client'
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Logo from './components/Logo';
 import CTAButton from './components/CTAButton';
-import TeacherDashboard from './components/TeacherDashboard';
-import StudentDashboard from './components/StudentDashboard';
 import { ThemeToggleButton } from './components/ThemeProvider';
 import { mockData } from './data/mockData';
 
-type PageType = 'landing' | 'teacher' | 'student';
-
 export default function Home() {
-  const [page, setPage] = useState<PageType>('landing');
+  const router = useRouter();
 
-  // Página Landing
-  const LandingPage = () => (
+  return (
     <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 shadow-sm">
@@ -34,7 +30,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center space-x-2">
             <ThemeToggleButton />
-            <CTAButton onClick={() => setPage('teacher')}>
+            <CTAButton onClick={() => router.push('/docente')}>
               Para Docentes
             </CTAButton>
           </div>
@@ -71,10 +67,10 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.4 }}
             className="mt-8 flex flex-wrap justify-center items-center gap-4"
           >
-            <CTAButton primary onClick={() => setPage('teacher')}>
+            <CTAButton primary onClick={() => router.push('/docente')}>
               Para Docentes
             </CTAButton>
-            <CTAButton onClick={() => setPage('student')}>
+            <CTAButton onClick={() => router.push('/estudiantes')}>
               Para Estudiantes
             </CTAButton>
           </motion.div>
@@ -184,32 +180,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  );
-
-  // Renderizar según la página activa
-  const renderPage = () => {
-    switch (page) {
-      case 'teacher':
-        return <TeacherDashboard onBack={() => setPage('landing')} />;
-      case 'student':
-        return <StudentDashboard onBack={() => setPage('landing')} />;
-      case 'landing':
-      default:
-        return <LandingPage />;
-    }
-  };
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={page}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        {renderPage()}
-      </motion.div>
-    </AnimatePresence>
   );
 }
