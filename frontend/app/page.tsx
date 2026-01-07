@@ -64,14 +64,11 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.4 }}
                 className="flex flex-col sm:flex-row items-center justify-center gap-6"
             >
-                <CTAButton primary onClick={() => router.push('/docente')}>
-                    Comenzar como Docente
-                </CTAButton>
                 <button 
-                  onClick={() => router.push('/estudiantes')}
-                  className="px-8 py-4 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-white font-bold shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-200 dark:border-gray-700 flex items-center gap-3 group"
+                  onClick={() => router.push('/login')}
+                  className="px-8 py-4 rounded-xl bg-blue-700 text-black font-bold shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-transparent flex items-center gap-3 group"
                 >
-                    Soy Estudiante <ArrowRight className="w-5 h-5 text-colombia-blue dark:text-sky-400 group-hover:translate-x-1 transition-transform"/>
+                    Ingresar <ArrowRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform"/>
                 </button>
             </motion.div>
         </div>
@@ -215,7 +212,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
                 <CTAButton 
                 className="bg-colombia-yellow text-gray-900 hover:bg-yellow-400 text-xl px-12 py-5 shadow-yellow-500/20 shadow-lg font-extrabold"
-                onClick={() => router.push('/docente')}
+                onClick={() => router.push('/login')}
                 >
                 Empezar Gratis Ahora
                 </CTAButton>

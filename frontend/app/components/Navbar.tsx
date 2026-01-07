@@ -53,18 +53,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center space-x-4">
-          <ThemeToggleButton />
-          <button
-            onClick={() => router.push('/docente')}
-            className="text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-sky-400"
-          >
-            Soy Docente
-          </button>
-          <CTAButton onClick={() => router.push('/estudiantes')}>
-            Soy Estudiante
-          </CTAButton>
-        </div>
+      
 
         {/* Botón de Menú Móvil */}
         <div className="md:hidden flex items-center space-x-4">
@@ -78,7 +67,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Overlay de Menú Móvil */}
+      {/* Superposición de Menú Móvil */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -98,16 +87,7 @@ export default function Navbar() {
                   {link.name}
                 </a>
               ))}
-              <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-4" />
-              <button
-                onClick={() => router.push('/docente')}
-                className="w-full py-3 text-center text-gray-700 dark:text-gray-200 font-semibold"
-              >
-                Soy Docente
-              </button>
-              <div className="w-full" onClick={() => router.push('/estudiantes')}>
-                  <CTAButton className="w-full justify-center">Soy Estudiante</CTAButton>
-              </div>
+             
             </div>
           </motion.div>
         )}

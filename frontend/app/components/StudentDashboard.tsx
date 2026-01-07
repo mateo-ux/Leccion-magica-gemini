@@ -3,16 +3,28 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, MessageSquare } from 'lucide-react';
-import { mockData } from '../data/mockData';
+
+// import { mockData } from '../data/mockData'; // Eliminado para integración backend
 import { ThemeToggleButton } from './ThemeProvider';
 import TutorChat from './TutorChat';
+
+import { useRouter } from 'next/navigation';
 
 interface StudentDashboardProps {
     onBack: () => void;
 }
 
 export default function StudentDashboard({ onBack }: StudentDashboardProps) {
+    const router = useRouter();
     const [isTutorOpen, setIsTutorOpen] = useState(false);
+
+    const handleLogout = () => {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userRole');
+        router.push('/login');
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
             {/* Header */}
@@ -24,10 +36,10 @@ export default function StudentDashboard({ onBack }: StudentDashboardProps) {
                     <div className="flex items-center gap-3">
                         <ThemeToggleButton />
                         <button
-                            onClick={onBack}
-                            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                            onClick={handleLogout}
+                            className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 font-medium"
                         >
-                            ← Volver al Inicio
+                            Cerrar Sesión
                         </button>
                     </div>
                 </div>
@@ -63,35 +75,10 @@ export default function StudentDashboard({ onBack }: StudentDashboardProps) {
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {mockData.student.modules.map((mod, i) => (
-                                    <motion.div
-                                        key={i}
-                                        whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
-                                        className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md cursor-pointer"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <span className="text-3xl">{mod.icon}</span>
-                                                <h4 className="font-bold mt-2 text-gray-900 dark:text-white">
-                                                    {mod.title}
-                                                </h4>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    {mod.subject}
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center space-x-2 text-green-500 font-bold">
-                                                <CheckCircle size={18} />
-                                                <span>{mod.progress}%</span>
-                                            </div>
-                                        </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-4">
-                                            <div
-                                                className="bg-green-500 h-2.5 rounded-full transition-all duration-500"
-                                                style={{ width: `${mod.progress}%` }}
-                                            ></div>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                                {/* Placeholder para integración backend */}
+                                <div className="col-span-1 md:col-span-2 text-center py-10 bg-gray-50 dark:bg-gray-700/30 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                                    <p className="text-gray-500 dark:text-gray-400">Cargando módulos de aprendizaje...</p>
+                                </div>
                             </div>
                         </div>
 
@@ -101,21 +88,10 @@ export default function StudentDashboard({ onBack }: StudentDashboardProps) {
                                 Logros Recientes
                             </h3>
                             <div className="space-y-4">
-                                {mockData.student.achievements.map((ach, i) => (
-                                    <div key={i} className="flex items-center space-x-4">
-                                        <div className="text-3xl bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-full">
-                                            {ach.icon}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900 dark:text-white">
-                                                {ach.title}
-                                            </p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {ach.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                                {/* Placeholder para integración backend */}
+                                <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+                                    <p>Tus logros aparecerán aquí.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
