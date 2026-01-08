@@ -1,13 +1,8 @@
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, MessageSquare } from 'lucide-react';
-
-// import { mockData } from '../data/mockData'; // Eliminado para integración backend
 import { ThemeToggleButton } from './ThemeProvider';
-import TutorChat from './TutorChat';
-
 import { useRouter } from 'next/navigation';
 
 interface StudentDashboardProps {
@@ -16,7 +11,6 @@ interface StudentDashboardProps {
 
 export default function StudentDashboard({ onBack }: StudentDashboardProps) {
     const router = useRouter();
-    const [isTutorOpen, setIsTutorOpen] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
@@ -97,23 +91,6 @@ export default function StudentDashboard({ onBack }: StudentDashboardProps) {
                     </div>
                 </motion.div>
             </main>
-
-            {/* Botón Flotante del Tutor */}
-            <motion.button
-                onClick={() => setIsTutorOpen(true)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-40 flex items-center gap-2"
-            >
-                <MessageSquare />
-                <span className="font-semibold">Tutor IA</span>
-            </motion.button>
-
-            {/* Chat del Tutor */}
-            <TutorChat
-                isOpen={isTutorOpen}
-                onClose={() => setIsTutorOpen(false)}
-            />
         </div>
     );
 }

@@ -7,7 +7,7 @@ import Navbar from './components/Navbar';
 import HeroBackground from './components/HeroBackground';
 import BentoGrid from './components/BentoGrid';
 import CTAButton from './components/CTAButton';
-import { mockData } from './data/mockData';
+
 import { ArrowRight, ChevronDown, Award } from 'lucide-react';
 
 export default function Home() {
