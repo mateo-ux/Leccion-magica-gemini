@@ -7,8 +7,9 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
-load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Cargar .env desde la raíz del proyecto (un nivel arriba de backend/)
+load_dotenv(BASE_DIR.parent / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
 

@@ -1,9 +1,22 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeToggleButton } from './ThemeProvider';
-import { motion } from 'framer-motion';
-import { Calendar as CalendarIcon, FileDigit, FileText, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    LayoutDashboard, 
+    GraduationCap, 
+    Calendar, 
+    Settings, 
+    LogOut, 
+    Menu, 
+    X,
+    Bell
+} from 'lucide-react';
 import TeacherAssistant from './TeacherAssistant';
+import TeacherHome from './TeacherHome';
+import TeacherClassrooms from './TeacherClassrooms';
 
 interface TeacherDashboardProps {
     onBack: () => void;
@@ -21,6 +34,8 @@ export default function TeacherDashboard({ onBack }: TeacherDashboardProps) {
     const router = useRouter(); 
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('home');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     
     // controlador de el cierre de sesión
     const handleLogout = () => {
@@ -59,13 +74,6 @@ export default function TeacherDashboard({ onBack }: TeacherDashboardProps) {
         };
         fetchUserData();
     }, []);
-    
-    // Datos vacíos hasta integración
-    const classes: any[] = [];
-    const resources: any[] = [];
-    const activeClasses = classes.length;
-    const totalStudents = classes.reduce((acc, curr) => acc + curr.studentCount, 0);
-    const totalResources = resources.length;
 
     const getDisplayName = () => {
         if (!user) return 'Cargando...';
@@ -80,145 +88,145 @@ export default function TeacherDashboard({ onBack }: TeacherDashboardProps) {
         return user.username.substring(0, 2).toUpperCase();
     }
 
+    const menuItems = [
+        { id: 'home', label: 'Inicio', icon: LayoutDashboard },
+        { id: 'classrooms', label: 'Gestión de Aulas', icon: GraduationCap },
+        { id: 'calendar', label: 'Calendario', icon: Calendar }, // Placeholder
+        { id: 'settings', label: 'Configuración', icon: Settings }, // Placeholder
+    ];
+
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col relative overflow-hidden">
-            {/* Background Grid */}
-            <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.08] pointer-events-none z-0"
-                 style={{ 
-                     backgroundImage: `linear-gradient(#0033A0 1px, transparent 1px), linear-gradient(to right, #0033A0 1px, transparent 1px)`, 
-                     backgroundSize: '30px 30px' 
-                 }}>
-            </div>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex overflow-hidden">
+            {/* Sidebar */}
+            <motion.aside 
+                initial={false}
+                animate={{ width: isSidebarOpen ? 280 : 80 }}
+                className="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 relative z-20 flex flex-col transition-all duration-300 shadow-xl"
+            >
+                {/* Logo Area */}
+                <div className="p-6 flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shrink-0">
+                        LM
+                    </div>
+                    {isSidebarOpen && (
+                        <span className="font-bold text-xl text-gray-800 dark:text-white truncate">
+                            Lección Mágica
+                        </span>
+                    )}
+                </div>
 
-             {/* Background Decoration Elements */}
-             <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-                <div className="absolute top-20 left-10 text-6xl text-blue-100 dark:text-blue-900/20 rotate-12 font-bold pointer-events-none">Aa</div>
-                <div className="absolute bottom-40 right-20 text-8xl text-purple-100 dark:text-purple-900/20 -rotate-12 pointer-events-none">∑</div>
-                <div className="absolute top-1/3 right-1/4 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="absolute bottom-1/4 left-1/3 w-40 h-40 bg-pink-400/10 rounded-full blur-3xl pointer-events-none"></div>
-             </div>
-
-            {/* Header */}
-            <header className="bg-white dark:bg-gray-800 shadow-sm relative z-10">
-                <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Dashboard Docente
-                    </h1>
-                    <div className="flex items-center gap-3">
-                        <ThemeToggleButton />
+                {/* Navigation */}
+                <nav className="flex-1 px-4 py-4 space-y-2">
+                    {menuItems.map((item) => (
                         <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 font-medium"
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                                ${activeTab === item.id 
+                                    ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 font-bold shadow-sm' 
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white'
+                                }
+                            `}
                         >
+                            <item.icon size={22} className={`shrink-0 ${activeTab === item.id ? 'text-purple-600 dark:text-purple-400' : ''}`} />
+                            {isSidebarOpen && <span>{item.label}</span>}
+                            
+                            {/* Active Indicator Strip */}
+                            {activeTab === item.id && (
+                                <span className="absolute left-0 w-1 h-8 bg-purple-600 rounded-r-full"></span>
+                            )}
+                        </button>
+                    ))}
+                </nav>
+
+                {/* User Profile Mini & Logout */}
+                <div className="p-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className={`flex items-center gap-3 ${isSidebarOpen ? '' : 'justify-center'}`}>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shrink-0">
+                            {getInitials()}
+                        </div>
+                        {isSidebarOpen && (
+                            <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{getDisplayName()}</p>
+                                <p className="text-xs text-gray-500 text-purple-500">Docente</p>
+                            </div>
+                        )}
+                        {isSidebarOpen && (
+                             <ThemeToggleButton />
+                        )}
+                    </div>
+                    {isSidebarOpen && (
+                        <button 
+                            onClick={handleLogout}
+                            className="w-full mt-4 flex items-center justify-center gap-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 py-2 rounded-lg transition-colors"
+                        >
+                            <LogOut size={16} />
                             Cerrar Sesión
                         </button>
-                    </div>
+                    )}
                 </div>
-            </header>
+            </motion.aside>
 
-            <main className="container mx-auto px-6 py-8 relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                        Bienvenida, {loading ? '...' : getDisplayName().split(' ')[0]}
-                    </h2>
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
+                {/* Background Decoration */}
+                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-0"
+                     style={{ 
+                         backgroundImage: `linear-gradient(#6366f1 1px, transparent 1px), linear-gradient(to right, #6366f1 1px, transparent 1px)`, 
+                         backgroundSize: '40px 40px' 
+                     }}>
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Columna Principal */}
-                        <div className="lg:col-span-2 space-y-6">
-                            
-                            {/* Gestión de Aulas - Placeholder */}
-                             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Gestión de Aulas</h3>
-                                <p className="text-gray-500 text-sm">Cargando aulas desde el backend...</p>
-                             </div>
+                {/* Topbar */}
+                <header className="h-16 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 z-10">
+                   <div className="flex items-center gap-4">
+                        <button 
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-500 transition-colors"
+                        >
+                            <Menu size={20} />
+                        </button>
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-white">
+                            {menuItems.find(i => i.id === activeTab)?.label}
+                        </h2>
+                   </div>
+                   
+                   <div className="flex items-center gap-4">
+                       <button className="relative p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                           <Bell size={20} />
+                           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
+                       </button>
+                   </div>
+                </header>
 
-                            {/* Calendario de Actividades */}
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
-                                    <CalendarIcon className="text-green-600" />
-                                    Calendario y Actividades
-                                </h3>
-                                <div className="space-y-3">
-                                    <div className="text-center py-8 text-gray-400">
-                                        <p>No hay actividades pendientes.</p>
-                                        <p className="text-xs mt-1">Las actividades se sincronizarán aquí.</p>
+                {/* Content Area */}
+                <main className="flex-1 overflow-y-auto p-8 relative z-10 scrollbar-hide">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeTab}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="h-full"
+                        >
+                            {activeTab === 'home' && <TeacherHome user={user} />}
+                            {activeTab === 'classrooms' && <TeacherClassrooms />}
+                            {(activeTab === 'calendar' || activeTab === 'settings') && (
+                                <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                                        <Settings size={32} />
                                     </div>
+                                    <h3 className="text-lg font-medium text-gray-500">Próximamente</h3>
+                                    <p>Esta funcionalidad estará disponible en la próxima actualización.</p>
                                 </div>
-                            </div>
-                        </div>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
+                </main>
+            </div>
 
-                        {/* Sidebar */}
-                        <div className="space-y-6">
-                            {/* Perfil */}
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md text-center">
-                                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-400 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
-                                    {getInitials()}
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                                    {getDisplayName()}
-                                </h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Docente de Secundaria</p>
-                                <div className="mt-4 flex justify-center gap-4 text-sm font-medium text-gray-600 dark:text-gray-300">
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-blue-600">{activeClasses}</div>
-                                        <div>Clases</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-purple-600">{totalStudents}</div>
-                                        <div>Alumnos</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-xl font-bold text-pink-600">{totalResources}</div>
-                                        <div>Recursos</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                             {/* Biblioteca de Recursos */}
-                             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                                        Biblioteca de Recursos
-                                    </h3>
-                                </div>
-
-                                <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                                    {resources.map((recurso) => (
-                                        <div
-                                            key={recurso.id}
-                                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-transparent hover:border-pink-200 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="min-w-[32px] w-8 h-8 rounded-lg bg-white dark:bg-gray-600 flex items-center justify-center text-pink-500">
-                                                    {recurso.type === 'PDF' && <FileDigit size={18} />}
-                                                    {recurso.type === 'Doc' && <FileText size={18} />}
-                                                    {recurso.type === 'Link' && <Download size={18} />}
-                                                </div>
-                                                <div className="truncate">
-                                                    <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                                                        {recurso.title}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                        {recurso.subject}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {resources.length === 0 && (
-                                        <p className="text-center text-xs text-gray-400 py-4">No hay recursos aún.</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            </main>
-            {/* Modals & Floating Buttons */}
+            {/* Asistente Flotante Integrado */}
             <TeacherAssistant />
         </div>
     );

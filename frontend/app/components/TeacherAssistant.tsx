@@ -2,11 +2,20 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Sparkles, BookOpen, Calculator, Edit3, Image as ImageIcon } from 'lucide-react';
+import { MessageSquare, X, Send, Sparkles, BookOpen, Calculator, Edit3, Image as ImageIcon, History, Clock, ChevronRight } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
+}
+
+interface HistoryItem {
+    id: number;
+    user_message: string;
+    assistant_response: string;
+    created_at: string;
+    has_sources: boolean;
 }
 
 export default function TeacherAssistant() {
@@ -16,6 +25,10 @@ export default function TeacherAssistant() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState<'tools' | 'history'>('tools');
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -23,8 +36,41 @@ export default function TeacherAssistant() {
     };
 
     useEffect(() => {
-        scrollToBottom();
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
     }, [messages]);
+
+    const fetchHistory = async () => {
+        setIsLoadingHistory(true);
+        try {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch('http://localhost:8000/api/assistant/chat-history/', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setHistory(data.history);
+            }
+        } catch (error) {
+            console.error('Error fetching history:', error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'history') {
+            fetchHistory();
+        }
+    }, [activeTab]);
+
+    const handleLoadHistory = (item: HistoryItem) => {
+        setMessages([
+            { role: 'user', content: item.user_message },
+            { role: 'assistant', content: item.assistant_response }
+        ]);
+    };
 
     const handleSendMessage = async () => {
         if (!input.trim()) return;
@@ -89,41 +135,107 @@ export default function TeacherAssistant() {
                             <X size={24} />
                         </button>
 
-                        {/* Panel Izquierdo: Herramientas / Módulos */}
-                        <div className="hidden md:flex w-1/3 bg-gray-50 dark:bg-gray-800/50 p-8 flex-col border-r border-gray-200 dark:border-gray-700">
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
-                                <Sparkles className="text-purple-500" />
-                                Herramientas
-                            </h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
-                                Selecciona un modulo.
-                            </p>
+                        {/* Panel Izquierdo: Herramientas / Historial */}
+                        <div className="hidden md:flex w-1/3 bg-gray-50 dark:bg-gray-800/50 flex-col border-r border-gray-200 dark:border-gray-700">
+                             {/* Tabs Header */}
+                             <div className="flex p-2 m-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                                <button
+                                    onClick={() => setActiveTab('tools')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                                        activeTab === 'tools'
+                                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+                                        : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    <Sparkles size={16} />
+                                    Herramientas
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('history')}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                                        activeTab === 'history'
+                                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                                        : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    <History size={16} />
+                                    Historial
+                                </button>
+                            </div>
 
-                            <div className="grid grid-cols-1 gap-4">
-                                {[
-                                    { icon: BookOpen, label: "Crear Lección", color: "bg-blue-100 text-blue-600" },
-                                    { icon: Calculator, label: "Generador de contenido", color: "bg-green-100 text-green-600" },
-                                    { icon: Edit3, label: "Curriculum", color: "bg-orange-100 text-orange-600" },
-                                    { icon: ImageIcon, label: "Generador de actividades", color: "bg-pink-100 text-pink-600" },
-                                    { icon: ImageIcon, label: "Gestion de Clases", color: "bg-pink-100 text-pink-600" },
-                                ].map((item, idx) => (
-                                    <button 
-                                        key={idx}
-                                        className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 hover:shadow-md transition-shadow border border-transparent hover:border-purple-200 text-left group"
-                                    >
-                                        <div className={`p-3 rounded-lg ${item.color} group-hover:scale-110 transition-transform`}>
-                                            <item.icon size={20} />
+                            {/* Content Area */}
+                            <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+                                {activeTab === 'tools' ? (
+                                    <>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 px-2">
+                                            Selecciona un módulo.
+                                        </p>
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {[
+                                                { icon: BookOpen, label: "Crear Lección", color: "bg-blue-100 text-blue-600" },
+                                                { icon: Calculator, label: "Generador de contenido", color: "bg-green-100 text-green-600" },
+                                                { icon: Edit3, label: "Curriculum", color: "bg-orange-100 text-orange-600" },
+                                                { icon: ImageIcon, label: "Generador de actividades", color: "bg-pink-100 text-pink-600" },
+                                                { icon: ImageIcon, label: "Gestion de Clases", color: "bg-pink-100 text-pink-600" },
+                                            ].map((item, idx) => (
+                                                <button 
+                                                    key={idx}
+                                                    className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-gray-800 hover:shadow-md transition-shadow border border-transparent hover:border-purple-200 text-left group"
+                                                >
+                                                    <div className={`p-3 rounded-lg ${item.color} group-hover:scale-110 transition-transform`}>
+                                                        <item.icon size={20} />
+                                                    </div>
+                                                    <span className="font-semibold text-gray-700 dark:text-gray-200">{item.label}</span>
+                                                </button>
+                                            ))}
                                         </div>
-                                        <span className="font-semibold text-gray-700 dark:text-gray-200">{item.label}</span>
-                                    </button>
-                                ))}
+                                    </>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {isLoadingHistory ? (
+                                             <div className="flex justify-center p-8"><span className="animate-spin text-blue-500"><Sparkles/></span></div>
+                                        ) : history.length === 0 ? (
+                                            <div className="text-center p-8 text-gray-400">
+                                                <History className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                                <p className="text-sm">No tienes historial aún.</p>
+                                            </div>
+                                        ) : (
+                                            history.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => handleLoadHistory(item)}
+                                                    className="w-full bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all text-left group"
+                                                >
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <span className="text-[10px] uppercase font-bold text-gray-400 flex items-center gap-1">
+                                                            <Clock size={10} />
+                                                            {new Date(item.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        {item.has_sources && (
+                                                            <span className="text-[10px] bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full">
+                                                                Fuentes
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                                        {item.user_message}
+                                                    </p>
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             
-                            <div className="mt-auto bg-purple-100 dark:bg-purple-900/20 p-4 rounded-xl">
-                                <p className="text-xs text-purple-800 dark:text-purple-200 font-medium text-center">
-                                    💡 Tip: Pídele a Mágico que cree una rúbrica de evaluación.
-                                </p>
-                            </div>
+                            {activeTab === 'tools' && (
+                                <div className="px-6 pb-6 mt-auto">
+                                    <div className="bg-purple-100 dark:bg-purple-900/20 p-4 rounded-xl">
+                                        <p className="text-xs text-purple-800 dark:text-purple-200 font-medium text-center">
+                                            💡 Tip: Pídele a Mágico que cree una rúbrica de evaluación.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Panel Derecho: Chat */}
@@ -157,7 +269,29 @@ export default function TeacherAssistant() {
                                                 : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-bl-none'
                                             }`}
                                         >
-                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                            {msg.role === 'assistant' ? (
+                                                <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-headings:font-bold prose-headings:mt-3 prose-headings:mb-2 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                                                    <ReactMarkdown
+                                                        components={{
+                                                            a: ({node, ...props}) => (
+                                                                <a 
+                                                                    {...props} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer" 
+                                                                    className="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-colors no-underline ml-1 max-w-[150px] truncate align-middle transform hover:scale-105"
+                                                                >
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                                    <span className="truncate max-w-[120px]">{props.children}</span>
+                                                                </a>
+                                                            )
+                                                        }}
+                                                    >
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

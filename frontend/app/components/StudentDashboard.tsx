@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ThemeToggleButton } from './ThemeProvider';
 import { useRouter } from 'next/navigation';
+import StudentAssistant from './StudentAssistant';
 
 interface StudentDashboardProps {
     onBack: () => void;
@@ -90,6 +91,7 @@ export default function StudentDashboard({ onBack }: StudentDashboardProps) {
                         </div>
                     </div>
                 </motion.div>
+                <StudentAssistant />
             </main>
         </div>
     );
